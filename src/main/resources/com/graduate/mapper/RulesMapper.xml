@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.graduate.mapper.RulesMapper">
+    
+    <sql id="table_name">rules</sql>
+    
+	<sql id="rulesColumns">
+		a.id AS "id",
+		a.carid AS "carid",
+		a.contents AS "contents",
+		a.price AS "price",
+		a.time AS "time"
+	</sql>
+	
+	<sql id="rulesJoins">
+		left join car b on a.carid = b.id
+	</sql>
+    
+	<select id="get" resultType="com.graduate.bean.Rules">
+		SELECT 
+			<include refid="rulesColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="rulesJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.graduate.bean.Rules">
+		SELECT b.brand+'-'+b.cartype+'-'+b.number as carname,
+			<include refid="rulesColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="rulesJoins"/>
+		<where>
+			
+			<if test="rules.carid != null and rules.carid != ''">
+				AND a.carid = #{rules.carid}
+			</if>
+		</where>
+		ORDER BY a.time DESC
+	</select>
+	
+	<insert id="insert" parameterType="com.graduate.bean.Rules">
+		INSERT INTO <include refid="table_name"/>(
+			id,
+			carid,
+			contents,
+			price,
+			time
+		) VALUES (
+			#{id},
+			#{carid},
+			#{contents},
+			#{price},
+			#{time}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.graduate.bean.Rules">
+		UPDATE <include refid="table_name"/> SET 	
+			carid = #{carid},
+			contents = #{contents},
+			price = #{price},
+			time = #{time}
+		WHERE id = #{id, jdbcType = VARCHAR}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM <include refid="table_name"/>
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

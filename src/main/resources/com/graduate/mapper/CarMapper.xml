@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.graduate.mapper.CarMapper">
+    
+    <sql id="table_name">car</sql>
+    
+	<sql id="carColumns">
+		a.id AS "id",
+		a.brand AS "brand",
+		a.cartype AS "cartype",
+		a.number AS "number",
+		a.price AS "price",
+		a.contents AS "contents",
+		a.seat AS "seat",
+		a.safe AS "safe",
+		a.oil AS "oil",
+		a.state AS "state"
+	</sql>
+	
+	<sql id="carJoins">
+	</sql>
+    
+	<select id="get" resultType="com.graduate.bean.Car">
+		SELECT 
+			<include refid="carColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="carJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.graduate.bean.Car">
+		SELECT 
+			<include refid="carColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="carJoins"/>
+		<where>
+			
+			<if test="car.brand != null and car.brand != ''">
+				AND a.brand LIKE '%'+#{car.brand}+'%'
+			</if>
+			<if test="car.cartype != null and car.cartype != ''">
+				AND a.cartype LIKE '%'+#{car.cartype}+'%'
+			</if>
+			<if test="car.price != null and car.price != ''">
+				AND a.price = #{car.price}
+			</if>
+			<if test="car.seat != null and car.seat != ''">
+				AND a.seat = #{car.seat}
+			</if>
+			<if test="car.state != null and car.state != ''">
+				AND a.state = #{car.state}
+			</if>
+		</where>
+		ORDER BY a.brand ASC, a.cartype ASC, a.number ASC
+	</select>
+	
+	<insert id="insert" parameterType="com.graduate.bean.Car">
+		INSERT INTO <include refid="table_name"/>(
+			id,
+			brand,
+			cartype,
+			number,
+			price,
+			contents,
+			seat,
+			safe,
+			oil,
+			state
+		) VALUES (
+			#{id},
+			#{brand},
+			#{cartype},
+			#{number},
+			#{price},
+			#{contents},
+			#{seat},
+			#{safe},
+			#{oil},
+			#{state}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.graduate.bean.Car">
+		UPDATE <include refid="table_name"/> SET 	
+			brand = #{brand},
+			cartype = #{cartype},
+			number = #{number},
+			price = #{price},
+			contents = #{contents},
+			seat = #{seat},
+			safe = #{safe},
+			oil = #{oil},
+			state = #{state}
+		WHERE id = #{id, jdbcType = VARCHAR}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM <include refid="table_name"/>
+		WHERE id = #{id}
+	</update>
+	
+	<select id="rentlist" resultType="com.graduate.bean.Car">
+		SELECT a.brand AS "brand",a.cartype AS "cartype",a.price AS "price",a.seat AS "seat",count(*) AS "number"
+		FROM <include refid="table_name"/> a <include refid="carJoins"/>
+		<where>
+			<if test="car.brand != null and car.brand != ''">AND a.brand LIKE '%'+#{car.brand}+'%'</if>
+			<if test="car.cartype != null and car.cartype != ''">AND a.cartype LIKE '%'+#{car.cartype}+'%'</if>
+			<if test="car.brandq != null and car.brandq != ''">AND a.brand = #{car.brandq}</if>
+			<if test="car.cartypeq != null and car.cartypeq != ''">AND a.cartype = #{car.cartypeq}</if>
+			<if test="car.seat != null and car.seat != ''">AND a.seat = #{car.seat}</if>
+			<if test="car.state != null and car.state != ''">AND a.state = #{car.state}</if>
+		</where>
+		GROUP BY a.brand, a.cartype, a.price, a.seat
+		ORDER BY a.brand ASC, a.cartype ASC
+	</select>
+</mapper>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.graduate.mapper.RepairMapper">
+    
+    <sql id="table_name">repair</sql>
+    
+	<sql id="repairColumns">
+		a.id AS "id",
+		a.carid AS "carid",
+		a.contents AS "contents",
+		a.price AS "price",
+		a.time AS "time"
+	</sql>
+	
+	<sql id="repairJoins">
+		left join car b on a.carid = b.id
+	</sql>
+    
+	<select id="get" resultType="com.graduate.bean.Repair">
+		SELECT 
+			<include refid="repairColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="repairJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.graduate.bean.Repair">
+		SELECT b.brand+'-'+b.cartype+'-'+b.number as carname,
+			<include refid="repairColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="repairJoins"/>
+		<where>
+			
+			<if test="repair.carid != null and repair.carid != ''">
+				AND a.carid = #{repair.carid}
+			</if>
+		</where>
+		ORDER BY a.time DESC
+	</select>
+	
+	<insert id="insert" parameterType="com.graduate.bean.Repair">
+		INSERT INTO <include refid="table_name"/>(
+			id,
+			carid,
+			contents,
+			price,
+			time
+		) VALUES (
+			#{id},
+			#{carid},
+			#{contents},
+			#{price},
+			#{time}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.graduate.bean.Repair">
+		UPDATE <include refid="table_name"/> SET 	
+			carid = #{carid},
+			contents = #{contents},
+			price = #{price},
+			time = #{time}
+		WHERE id = #{id, jdbcType = VARCHAR}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM <include refid="table_name"/>
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

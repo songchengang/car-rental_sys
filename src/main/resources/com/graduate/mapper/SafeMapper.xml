@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.graduate.mapper.SafeMapper">
+    
+    <sql id="table_name">safe</sql>
+    
+	<sql id="safeColumns">
+		a.id AS "id",
+		a.carid AS "carid",
+		a.price AS "price",
+		a.begintime AS "begintime",
+		a.endtime AS "endtime",
+		a.userid AS "userid",
+		a.username AS "username",
+		a.company AS "company",
+		a.number AS "number"
+	</sql>
+	
+	<sql id="safeJoins">
+		left join car b on a.carid = b.id
+	</sql>
+    
+	<select id="get" resultType="com.graduate.bean.Safe">
+		SELECT 
+			<include refid="safeColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="safeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.graduate.bean.Safe">
+		SELECT b.brand+'-'+b.cartype+'-'+b.number as carname,
+			<include refid="safeColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="safeJoins"/>
+		<where>
+			
+			<if test="safe.carid != null and safe.carid != ''">
+				AND a.carid = #{safe.carid}
+			</if>
+		</where>
+		ORDER BY a.begintime DESC
+	</select>
+	
+	<insert id="insert" parameterType="com.graduate.bean.Safe">
+		INSERT INTO <include refid="table_name"/>(
+			id,
+			carid,
+			price,
+			begintime,
+			endtime,
+			userid,
+			username,
+			company,
+			number
+		) VALUES (
+			#{id},
+			#{carid},
+			#{price},
+			#{begintime},
+			#{endtime},
+			#{userid},
+			#{username},
+			#{company},
+			#{number}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.graduate.bean.Safe">
+		UPDATE <include refid="table_name"/> SET 	
+			carid = #{carid},
+			price = #{price},
+			begintime = #{begintime},
+			endtime = #{endtime},
+			userid = #{userid},
+			username = #{username},
+			company = #{company},
+			number = #{number}
+		WHERE id = #{id, jdbcType = VARCHAR}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM <include refid="table_name"/>
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

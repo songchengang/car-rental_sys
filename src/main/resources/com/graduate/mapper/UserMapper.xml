@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.graduate.mapper.UserMapper">
+    
+    <sql id="table_name">users</sql>
+    
+	<sql id="userColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.phone AS "phone",
+		a.gender AS "gender",
+		a.yajin AS "yajin",
+		a.yjtype AS "yjtype",
+		a.yjstate AS "yjstate",
+		a.xinyong AS "xinyong",
+		a.auth AS "auth",
+		a.password AS "password"
+	</sql>
+	
+	<sql id="userJoins">
+	</sql>
+    
+	<select id="get" resultType="com.graduate.bean.User">
+		SELECT 
+			<include refid="userColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="userJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.graduate.bean.User">
+		SELECT 
+			<include refid="userColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="userJoins"/>
+		<where>			
+			<if test="user.name != null and user.name != ''">
+				AND a.name LIKE '%'+#{user.name}+'%'
+			</if>
+			<if test="user.auth != null and user.auth != ''">
+				AND a.auth = #{user.auth}
+			</if>
+		</where>
+		ORDER BY a.id ASC
+	</select>
+	
+	<insert id="insert" parameterType="com.graduate.bean.User">
+		INSERT INTO <include refid="table_name"/>(
+			id,
+			name,
+			phone,
+			gender,
+			yajin,
+			yjtype,
+			yjstate,
+			xinyong,
+			auth,
+			password
+		) VALUES (
+			#{id},
+			#{name},
+			#{phone},
+			#{gender},
+			#{yajin},
+			#{yjtype},
+			#{yjstate},
+			#{xinyong},
+			#{auth},
+			#{password}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.graduate.bean.User">
+		UPDATE <include refid="table_name"/> SET 	
+			name = #{name},
+			phone = #{phone},
+			<if test="yajin != null and yajin != ''">
+			yajin = #{yajin},
+			</if>
+			<if test="yjstate != null and yjstate != ''">
+			yjstate = #{yjstate},
+			</if>
+			<if test="yjtype != null">
+			yjtype = #{yjtype},
+			</if>
+			<if test="xinyong != null and xinyong != ''">
+			xinyong = #{xinyong},
+			</if>
+			<if test="password != null and password != ''">
+			password = #{password},
+			</if>
+			gender = #{gender}
+		WHERE id = #{id, jdbcType = VARCHAR}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM <include refid="table_name"/>
+		WHERE id = #{id}
+	</update>
+	
+	<select id="identity" resultType="com.graduate.bean.User">
+        SELECT
+         <include refid="userColumns"/> 
+        FROM <include refid="table_name"/> a
+		where name = #{name} 
+        and password = #{password}
+    </select>
+	
+</mapper>

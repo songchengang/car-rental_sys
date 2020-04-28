@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.graduate.mapper.OrdersMapper">
+    
+    <sql id="table_name">orders</sql>
+    
+	<sql id="ordersColumns">
+		a.id AS "id",
+		a.carid AS "carid",
+		a.rentime AS "rentime",
+		a.returntime AS "returntime",
+		a.safe AS "safe",
+		a.price AS "price",
+		a.evaluate AS "evaluate",
+		a.qxstate AS "qxstate",
+		a.buytype AS "buytype",
+		a.createtime AS "createtime",
+		a.createid AS "createid",
+		a.createname AS "createname"
+	</sql>
+<!-- 	LEFT JOIN 关键字会从左表 (car) 那里返回所有的行，即使在右表 (orders) 中没有匹配的行。 -->
+	<sql id="ordersJoins">
+		left join car b on a.carid = b.id
+	</sql>
+<!--     查找所有值 -->
+	<select id="get" resultType="com.graduate.bean.Orders">
+		SELECT 
+			<include refid="ordersColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="ordersJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.graduate.bean.Orders">
+		SELECT b.brand+'-'+b.cartype+'-'+b.number as carname,
+<!-- DATEDIFF() 函数返回两个日期之间的时间。DATEDIFF(datepart,startdate,enddate) -->
+<!-- CONVERT() 函数可以用不同的格式显示日期/时间数据。CONVERT(data_type(length),data_to_be_converted,style) -->
+<!-- 			判断目前的时间与租车时间的距离 -->
+			DATEDIFF(Hour, CONVERT(varchar,GETDATE(),120), a.rentime)-1 as hour,
+			<include refid="ordersColumns"/>
+		FROM <include refid="table_name"/> a
+		<include refid="ordersJoins"/>
+		<where>
+<!-- 		对rent和return做判断，判断这两个时间是否在查询的begin和end这个时间段里 -->
+			<if test="orders.begintime != null and orders.begintime !='' and orders.endtime != null and orders.endtime != ''"> 
+ 				AND (a.rentime BETWEEN #{orders.begintime} AND #{orders.endtime} 
+				OR a.returntime BETWEEN #{orders.begintime} AND #{orders.endtime}) 
+			</if> 
+			<if test="orders.qxstate != null and orders.qxstate != ''">
+				AND a.qxstate = #{orders.qxstate}
+			</if>
+			<if test="orders.carid != null and orders.carid != ''">
+				AND a.carid = #{orders.carid}
+			</if>
+			<if test="orders.createid != null and orders.createid != ''">
+				AND a.createid = #{orders.createid}
+			</if>
+			<if test="orders.createname != null and orders.createname != ''">
+				AND a.createname = #{orders.createname}
+			</if>
+		</where>
+		ORDER BY a.createtime DESC
+	</select>
+<!-- 	INSERT INTO table_name (列1, 列2,...) VALUES (值1, 值2,....) -->
+	<insert id="insert" parameterType="com.graduate.bean.Orders">
+		INSERT INTO <include refid="table_name"/>(
+			id,carid,rentime,returntime,safe,price,evaluate,qxstate,
+			buytype,createtime,createid,createname
+		) VALUES (
+			#{id},#{carid},#{rentime},#{returntime},#{safe},
+			#{price},#{evaluate},#{qxstate},#{buytype},
+			#{createtime},#{createid},#{createname}
+		)
+	</insert>
+<!-- 	UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值 -->
+	<update id="update" parameterType="com.graduate.bean.Orders">
+		UPDATE <include refid="table_name"/> SET 	
+			carid = #{carid},
+			rentime = #{rentime},
+			returntime = #{returntime},
+			safe = #{safe},
+			price = #{price},
+			evaluate = #{evaluate},
+			qxstate = #{qxstate},
+			buytype = #{buytype},
+			createtime = #{createtime},
+			createid = #{createid},
+			createname = #{createname}
+		WHERE id = #{id, jdbcType = VARCHAR}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM <include refid="table_name"/>
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
